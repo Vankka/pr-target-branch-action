@@ -41,7 +41,17 @@ async function run() {
             }
         }
 
-        let pull_request = context.payload.pull_request;
+        let payload = context.payload;
+        let action = payload.action;
+        if (action === "edited") {
+            usingComment = false;
+            usingChangeTo = false;
+        } else if (action !== "opened") {
+            core.info("Ignoring action that isn't opened or edited");
+            return;
+        }
+
+        let pull_request = payload.pull_request;
         let to = pull_request.base;
         let from = pull_request.head;
 
