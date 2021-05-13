@@ -1,0 +1,15 @@
+{
+  "name": "pr-target-branch-action",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A GitHub action to check that a PR''s target branch is correct, commenting and/or changing it if required",
+  "main": "main.js",
+  "keywords": ["github action"],
+  "author": "Vankka",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.7",
+    "@actions/github": "^4.0.0",
+    "eslint": "^7.26.0"
+  }
+}

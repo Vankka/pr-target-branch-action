@@ -1,0 +1,32 @@
+name: 'Pull Request Target Branch Action'
+description: 'A action to check that a PR''s target branch is correct, commenting and/or changing it if required'
+
+inputs:
+  target:
+    description: 'The target branch'
+    required: true
+  exclude:
+    description: 'A list (space separated string) of base branches which are allowed to PR the given target (cannot be used with include)'
+    required: false
+  include:
+    description: 'A list (space separated string) of base branches which are not allowed to PR the given target (cannot be used with exclude)'
+    required: false
+
+  change-to:
+    description: 'The branch the PR''s target should be changed to if the target is incorrect'
+    required: false
+  comment:
+    description: 'The comment that will be posted when the target branch is incorrect'
+    required: false
+
+outputs:
+  wrong-target:
+    description: 'Boolean output indicating if the target branch was incorrect'
+  comment-posted:
+    description: 'The comment that was posted as a result of having the wrong branch, if any'
+  new-target:
+    description: 'The new target, if the target was changed'
+
+runs:
+  using: 'node12'
+  main: 'main.js'
