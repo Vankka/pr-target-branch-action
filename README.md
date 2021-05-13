@@ -15,7 +15,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: Vankka/pr-target-branch-action@v1
+      - uses: Vankka/pr-target-branch-action@v1.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -37,7 +37,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: Vankka/pr-target-branch-action@v1
+      - uses: Vankka/pr-target-branch-action@v1.1
         with:
           target: main
           exclude: development # Don't prevent going from development -> main
