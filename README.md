@@ -9,7 +9,9 @@ A GitHub action to check that a PR's target branch is correct, commenting and/or
 ```yaml
 name: Make sure new PRs are sent to development
 
-on: pull_request_target
+on:
+  pull_request_target:
+    types: [opened, edited]
 
 jobs:
   build:
@@ -31,7 +33,9 @@ When `change-to` and `comment` are not used, pull_request_target and the GITHUB_
 ```yaml
 name: Make sure new PRs are sent to development
 
-on: pull_request
+on:
+  pull_request:
+    types: [opened, edited]
 
 jobs:
   build:
