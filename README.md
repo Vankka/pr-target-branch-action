@@ -10,7 +10,7 @@ A GitHub action to check that a PR's target branch is correct, commenting and/or
 name: Make sure new PRs are sent to development
 
 on:
-  pull_request_target:
+  pull_request_target: # Please read https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ before using
     types: [opened, edited]
 
 jobs:
