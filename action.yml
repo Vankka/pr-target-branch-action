@@ -19,13 +19,26 @@ inputs:
     description: 'The comment that will be posted when the target branch is incorrect'
     required: false
 
+  already-exists-action:
+    description: 'The action to take if a pr with the same head & base already exists'
+    required: false
+    default: 'error'
+  already-exists-comment:
+    description: 'The comment to post if a pr with the same head & base already exists'
+    required: false
+  already-exists-other-comment:
+    description: 'The comment to post on the other pr if already-exists-action closes the other pr'
+    required: false
+
 outputs:
   wrong-target:
     description: 'Boolean output indicating if the target branch was incorrect'
   comment-posted:
-    description: 'The comment that was posted as a result of having the wrong branch, if any'
+    description: 'The comment that was posted, if any'
   new-target:
     description: 'The new target, if the target was changed'
+  pr-already-exists:
+    description: 'If a pr with the same head & base already exists'
 
 runs:
   using: 'node12'

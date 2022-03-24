@@ -1,6 +1,11 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
+const WRONG_TARGET_OUTPUT = "wrong-target"
+const COMMENTED_POSTED_OUTPUT = "comment-posted"
+const NEW_TARGET_OUTPUT = "new-target"
+const PR_ALREADY_EXISTS_OUTPUT = "pr-already-exists"
+
 async function run() {
     try {
         let context = github.context;
@@ -15,6 +20,9 @@ async function run() {
         let include = array(core.getInput("include"));
         let changeTo = core.getInput("change-to");
         let comment = core.getInput("comment");
+        let alreadyExistsComment = core.getInput("already-exists-comment");
+        let alreadyExistsAction = core.getInput("already-exists-action");
+        let alreadyExistsOtherComment = core.getInput("already-exists-other-comment");
 
         let usingChangeTo = changeTo.length > 0;
         let usingComment = comment.length > 0;
@@ -91,7 +99,7 @@ async function run() {
             return;
         }
 
-        const rightTarget = () => core.setOutput("wrong-target", false);
+        const rightTarget = () => core.setOutput(WRONG_TARGET_OUTPUT, false);
         if (include.length > 0 && !isInArray(from, include, true)) {
             core.info("This repository/branch is not included");
             rightTarget();
@@ -101,7 +109,7 @@ async function run() {
             rightTarget();
             return;
         }
-        core.setOutput("wrong-target", true);
+        core.setOutput(WRONG_TARGET_OUTPUT, true);
 
         if (usingChangeTo || usingComment) {
             let octokit = github.getOctokit(token);
@@ -110,7 +118,84 @@ async function run() {
             let repo = to.repo.name;
             let prNumber = pull_request.number;
 
+            let prAlreadyExists = false;
+            let comments = [];
+
             if (usingChangeTo) {
+                let list = await octokit.pulls.list({
+                    owner: repoOwner,
+                    repo: repo,
+                    state: "open",
+                    head: from.label,
+                    base: changeTo
+                });
+
+                let existingPr = list.data.length !== 0 ? list.data[0] : null;
+                if (existingPr != null) {
+                    core.setOutput(PR_ALREADY_EXISTS_OUTPUT, true);
+                    prAlreadyExists = true;
+
+                    if (alreadyExistsComment != null && alreadyExistsComment.length > 0) {
+                        let comment = alreadyExistsComment
+                            .replace("{number}", existingPr.number.toString())
+                            .replace("{url}", existingPr._links.html.href);
+
+                        await octokit.issues.createComment({
+                            owner: repoOwner,
+                            repo: repo,
+                            issue_number: prNumber,
+                            body: comment
+                        });
+                        comments.push(comment);
+                        core.setOutput(COMMENTED_POSTED_OUTPUT, comments.toString());
+                    }
+
+                    if (alreadyExistsAction != null) {
+                        switch (alreadyExistsAction) {
+                            case "error":
+                                core.setFailed("A open PR already exists for the same head & base");
+                                break;
+                            case "close_this":
+                                await octokit.pulls.update({
+                                    owner: repoOwner,
+                                    repo: repo,
+                                    pull_number: prNumber,
+                                    state: "closed"
+                                });
+                                break;
+                            case "close_other":
+                            case "close_other_continue":
+                                if (alreadyExistsOtherComment != null && alreadyExistsOtherComment.length > 0) {
+                                    let comment = alreadyExistsOtherComment
+                                        .replace("{number}", pull_request.number.toString())
+                                        .replace("{url}", pull_request._links.html.href);
+
+                                    await octokit.issues.createComment({
+                                        owner: repoOwner,
+                                        repo: repo,
+                                        issue_number: existingPr.number,
+                                        body: comment
+                                    });
+                                }
+                                await octokit.pulls.update({
+                                    owner: repoOwner,
+                                    repo: repo,
+                                    pull_number: existingPr.number,
+                                    state: "closed"
+                                });
+                                break;
+                            case "nothing": break;
+                            default: {
+                                core.info("Unrecognized already-exists-action: " + alreadyExistsAction);
+                            }
+                        }
+                    }
+
+                    if (alreadyExistsAction !== "close_other_continue") {
+                        return;
+                    }
+                }
+
                 if (changeTo === from.ref) {
                     // Don't change the base & head to match
                     core.info("Not changing base because it would be the same as the head");
@@ -122,7 +207,7 @@ async function run() {
                     pull_number: prNumber,
                     base: changeTo
                 });
-                core.setOutput("new-target", changeTo);
+                core.setOutput(NEW_TARGET_OUTPUT, changeTo);
                 core.info("Changed the branch to " + changeTo);
             }
             if (usingComment) {
@@ -132,8 +217,13 @@ async function run() {
                     issue_number: prNumber,
                     body: comment
                 });
-                core.setOutput("comment-posted", comment);
+                comments.push(comment);
+                core.setOutput(COMMENTED_POSTED_OUTPUT, comments.toString());
                 core.info("Commented: " + comment);
+            }
+
+            if (!prAlreadyExists) {
+                core.setOutput(PR_ALREADY_EXISTS_OUTPUT, false);
             }
         } else {
             core.setFailed("This PR was submitted to the wrong branch");
