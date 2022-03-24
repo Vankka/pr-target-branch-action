@@ -51,7 +51,7 @@ jobs:
 
 ### target (Required)
 
-The base branch this action will check for, this also accepts a Regular Expression (pre- and suffixed with /), example values:
+The base branch this action will check for, this also accepts a Regular Expression (pre- and suffixed with /, the pattern should match only the branch name), example values:
 ```
 # Only matches the development branch
 development
@@ -60,11 +60,16 @@ development
 /feature-\\w+/
 ```
 
+Multiple values can be provided with a string of values separated by spaces, example:
+```
+include: "main development v1"
+```
+
 ### include
 
-Head (or compare) branch(es) that are subject to checking, can be provided with a branch name, `organization/owner name:branch name` or a Regular Expression matching the latter, example values:
+Head (or compare) branch(es) that are subject to checking, can be provided with a branch name, `organization/owner name:branch name` or a Regular Expression matching the latter. Also supports providing multiple targets by using spaces. Example values:
 ```
-# Match any branch called development
+# Match the target project's branch called development
 development
 
 # Only match GitHub's development branch
@@ -81,9 +86,9 @@ include: "main development v1"
 
 ### exclude
 
-Head (or compare) branch(es) that will **not** be checked, can be provided with a branch name, `organization/owner name:branch name` or a Regular Expression matching the latter, example values:
+Head (or compare) branch(es) that will **not** be checked, can be provided with a branch name, `organization/owner name:branch name` or a Regular Expression matching the latter. Also supports providing multiple targets by using spaces. Example values:
 ```
-# Match any branch called development
+# Match the target project's branch called development
 development
 
 # Only match GitHub's development branch
