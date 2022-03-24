@@ -17,7 +17,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: Vankka/pr-target-branch-action@v1.1
+      - uses: Vankka/pr-target-branch-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -41,7 +41,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: Vankka/pr-target-branch-action@v1.1
+      - uses: Vankka/pr-target-branch-action@v2
         with:
           target: main
           exclude: development # Don't prevent going from development -> main
@@ -56,14 +56,14 @@ Contains all the options, not necessarily a good configuration - see `already-ex
 name: Make sure new PRs are sent to development
 
 on:
-  pull_request_target:
+  pull_request_target: # Please read https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ before using
     types: [opened, edited]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: Vankka/pr-target-branch-action@v1.1
+      - uses: Vankka/pr-target-branch-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
