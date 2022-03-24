@@ -10,7 +10,7 @@ async function run() {
         }
 
         let token = process.env.GITHUB_TOKEN;
-        let targetBranch = core.getInput("target");
+        let targetBranch = array(core.getInput("target"));
         let exclude = array(core.getInput("exclude"));
         let include = array(core.getInput("include"));
         let changeTo = core.getInput("change-to");
@@ -55,14 +55,7 @@ async function run() {
         let to = pull_request.base;
         let from = pull_request.head;
 
-        let fromLabel = from.label;
-        let fromRef = from.ref;
-
-        let sameRepo = to.id === from.id;
-
-        if (targetBranch !== to.ref) {
-            return;
-        }
+        let sameRepo = to.repo.id === from.repo.id;
 
         function checkRegex(pattern, test) {
             if (pattern.startsWith("/") && pattern.endsWith("/")) {
@@ -72,30 +65,38 @@ async function run() {
             return false;
         }
 
-        function isInArray(array) {
+        function isInArray(target, array, allowDifferent) {
             for (let index in array) {
                 if (!array.hasOwnProperty(index)) {
                     continue;
                 }
 
+                let organizationBranch = target.label;
+                let branch = target.ref;
+
                 let value = array[index];
-                if (checkRegex(value, fromLabel)) {
+                if (checkRegex(value, (allowDifferent ? organizationBranch : branch))) {
                     return true;
-                } else if (value.indexOf(":") !== -1 && fromLabel === value) {
+                } else if (allowDifferent && value.indexOf(":") !== -1 && organizationBranch === value) {
                     return true;
-                } else if (sameRepo && value === fromRef) {
+                } else if ((sameRepo || !allowDifferent) && value === branch) {
                     return true;
                 }
             }
             return false;
         }
 
+        // Check that the target matches
+        if (!isInArray(to, targetBranch, false)) {
+            return;
+        }
+
         const rightTarget = () => core.setOutput("wrong-target", false);
-        if (include.length > 0 && !isInArray(include)) {
+        if (include.length > 0 && !isInArray(from, include, true)) {
             core.info("This repository/branch is not included");
             rightTarget();
             return;
-        } else if (isInArray(exclude)) {
+        } else if (isInArray(from, exclude, true)) {
             core.info("This repository/branch is excluded");
             rightTarget();
             return;
