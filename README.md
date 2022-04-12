@@ -14,7 +14,7 @@ on:
     types: [opened, edited]
 
 jobs:
-  build:
+  check-branch:
     runs-on: ubuntu-latest
     steps:
       - uses: Vankka/pr-target-branch-action@v2
@@ -38,7 +38,7 @@ on:
     types: [opened, edited]
 
 jobs:
-  build:
+  check-branch:
     runs-on: ubuntu-latest
     steps:
       - uses: Vankka/pr-target-branch-action@v2
@@ -60,7 +60,7 @@ on:
     types: [opened, edited]
 
 jobs:
-  build:
+  check-branch:
     runs-on: ubuntu-latest
     steps:
       - uses: Vankka/pr-target-branch-action@v2
