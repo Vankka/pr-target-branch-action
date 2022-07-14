@@ -51,10 +51,7 @@ async function run() {
 
         let payload = context.payload;
         let action = payload.action;
-        if (action === "edited") {
-            usingComment = false;
-            usingChangeTo = false;
-        } else if (action !== "opened") {
+        if (action !== "edited" && action !== "opened") {
             core.info("Ignoring action that isn't opened or edited");
             return;
         }
