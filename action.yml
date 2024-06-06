@@ -41,7 +41,7 @@ outputs:
     description: 'If a pr with the same head & base already exists'
 
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
 
 branding:
