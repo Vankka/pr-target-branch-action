@@ -10,14 +10,17 @@ A GitHub action to check that a PR's target branch is correct, commenting and/or
 name: Make sure new PRs are sent to development
 
 on:
-  pull_request_target: # Please read https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ before using
+  pull_request_target:
     types: [opened, edited]
 
 jobs:
   check-branch:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
-      - uses: Vankka/pr-target-branch-action@v2
+      # Do not checkout the repository here. See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ for more information
+      - uses: Vankka/pr-target-branch-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -25,7 +28,7 @@ jobs:
           exclude: development # Don't prevent going from development -> main
           change-to: development
           comment: |
-              Your PR was set to target `main`, PRs should be target `development`
+              Your PR's base branch was set to `main`, PRs should be set to target `development`.
               The base branch of this PR has been automatically changed to `development`, please check that there are no merge conflicts
 ```
 
@@ -40,8 +43,11 @@ on:
 jobs:
   check-branch:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
-      - uses: Vankka/pr-target-branch-action@v2
+      # Do not checkout the repository here. See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ for more information
+      - uses: Vankka/pr-target-branch-action@v3
         with:
           target: main
           exclude: development # Don't prevent going from development -> main
@@ -56,14 +62,17 @@ Contains all the options, not necessarily a good configuration - see `already-ex
 name: Make sure new PRs are sent to development
 
 on:
-  pull_request_target: # Please read https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ before using
+  pull_request_target:
     types: [opened, edited]
 
 jobs:
   check-branch:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
-      - uses: Vankka/pr-target-branch-action@v2
+      # Do not checkout the repository here. See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ for more information
+      - uses: Vankka/pr-target-branch-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -71,12 +80,18 @@ jobs:
           exclude: development # Don't prevent going from development -> main
           change-to: development
           comment: |
-              Your PR was set to target `main`, PRs should be target `development`
+              Your PR's base branch was set to `main`, PRs should be set to target `development`.
               The base branch of this PR has been automatically changed to `development`, please check that there are no merge conflicts
           already-exists-action: close_other_continue
           already-exists-comment: "Closing {url} as it has the same base branch"
           already-exists-other-comment: "This PR was closed in favor of {url}"
 ```
+
+## `Error: Resource not accessible by integration`
+
+If you run into this error when running this action please enable `Write` permissions for actions in your repository settings.  
+You can do this by going to `Settings > Actions > General` and ticking `Read and write permissions` under `Workflow permissions`.  
+If you want to restrict what permissions the action has access to, you can do so by following [Github's documentation](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token) or as specified in the above examples
 
 # Variables
 
